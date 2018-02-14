@@ -1,0 +1,21 @@
+<html><head></head><body><h1>Daftar Pembayaran Pendidikan/Institusi</h1>
+			<table>
+			<tr>
+			<td align='right'>
+				<table border=1 class=data>
+					<tr style='background-color:#003399; color:white; text-align:center'>
+						<td>#</td>
+						<td>NPM</td>
+						<td>name</td>
+						<td>Tingkat</td>
+						<td>Jurusan</td>
+						<td>Jenis Pembayaran</td>
+						<td>Lokasi</td>
+						<td>Jumlah</td>
+						<td>Tanggal Bayar</td>
+					</tr><tr><td align=right><b>1.</b></td><td><b>3164005</b></td><td>Darul Difo Utama</nobr></td><td>D4 AKUNTANSI</td><td style="mso-number-format:'\@';">D4 AKUNTANSI</td><td>SPP D4 AKUNTANSI-032017</td><td>Bandung</td><td>4900000</td><td>20-02-2017</td></tr><tr><td align=right><b>2.</b></td><td><b>3164015</b></td><td>Ilham Nurdiansyah</nobr></td><td>D4 AKUNTANSI</td><td style="mso-number-format:'\@';">D4 AKUNTANSI</td><td>SPP D4 AKUNTANSI-032017</td><td>Bandung</td><td>3675000</td><td>24-02-2017</td></tr><tr><td align=right><b>3.</b></td><td><b>3164083</b></td><td>Indah Fitri</nobr></td><td>D4 AKUNTANSI</td><td style="mso-number-format:'\@';">D4 AKUNTANSI</td><td>SPP D4 AKUNTANSI-032017</td><td>Bandung</td><td>3675000</td><td>21-02-2017</td></tr>
+				<tr><td colspan=6>&nbsp;</td><td>Jumlah:</td><td>12,250,000.00</td></tr>
+				</table>
+			</td>
+			</tr>
+			</table></body></html>

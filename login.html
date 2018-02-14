@@ -1,0 +1,18 @@
+<form action="" target="_self" method="post" style="height:100%;">
+    <ul class="full" style="background-color:#c95e00;">
+        <li>
+            <div style="width:454px;height:255px;background:url(images/loginPanel.png) center;display:inline-block;padding:14px;">
+                <ul style="height:130px;" class="full"><li><img src="images/loginTitle.png" border="0" /></li></ul>
+                <ul style="height:40px;" class="full">
+                    <li class="l"><input name="tUsername" id="tUsername" type="text" style="width:200px;" placeholder="- Username -" class="icon-username" required="required" /></li>
+                    <li class="r"><input name="tPassword" type="password" style="width:200px;" placeholder="- Password -" class="icon-password" required="required" /></li>
+                </ul>
+                <ol style="height:40px;" class="full">
+                    <li class="l errLogin">{ERROR}</li>
+                    <li class="r"><input name="tLogin" type="submit" value="LOGIN" class="icon-save" /></li>
+                </ol>
+            </div>
+        </li>
+    </ul>
+</form>
+<script language="javascript">elm('tUsername').focus();</script>
