@@ -1,5 +1,6 @@
 <?php
-	session_start();
+	error_reporting(0);
+	//session_start();
 	
 	require "../includes/masterConfig.php";
 	
@@ -59,26 +60,19 @@ table input[type=text], table input[type=password],  table select { width:400px;
 		?>
     </ol>
 </div>
-<div id="list">
-	<?php
-	$row=50;
-	$page=8;
-	$sql="select d.id_posting,d.tgl_start,d.tgl_finish from t_posting d
+
+<div id="list" style="border:1px solid #dddddd;background:#ffffff;" align="center">
+<?php 
+	$a=queryDb("select d.id_posting,d.tgl_start,d.tgl_finish from t_posting d
 				".(($_GT['sort'] && $_GT['search'])?"where lower(".$_GT['sort'].") like '%".strtolower($_GT['search'])."%'":"")." 
 				order by ".(($_GT['order'])?$_GT['order'].",d.tanggal desc":"d.tanggal desc");
-				
-	$param="sort=".bs64_e($_GT['sort'])."&search=".bs64_e($_GT['search'])."&order=".bs64_e($_GT['order']);
+						
+	//if(!mysql_num_rows($a)) echo "<div class='err'>Data tidak ditemukan</div>";
 	
-	$paging=paging($sql,$row,$page,$_GT['hal'],$param);
-	
-	if(is_array($paging)) {		
-		$a=queryDb($sql." limit ".$paging['start'].",".$row);
-		while($b=mysql_fetch_array($a)) {
-			$paging['start']++;
-			echo "<ul id=\"".str_replace("-","/",balikTanggal($b['tgl_finish']))."#".str_replace("-","/",balikTanggal($b['tgl_finish']))."\" onclick=\"sendTgl(this)\"><li>".$paging['start'].".</li><li>".$b['id_posting']."</li><li>".tglIndo($b['tgl_start'])."</li><li>".tglIndo($b['tgl_finish'])."</li></ul>";
-		}
-	}
+	while($b=mysql_fetch_array($a)) {
 	?>
+		<ul><li onclick="<?php echo "sendText('".$b['id_posting']."')"; ?>"><?php echo $b['id_posting']; ?></li></ul>
+<?php } ?>
 </div>
 <div id="titleBottom">
 	<ol>
@@ -112,6 +106,10 @@ table input[type=text], table input[type=password],  table select { width:400px;
 		
 		window.opener.setTanggal('1/1/<?=(date("Y")-1)?>',v[0],v[1]);
 		window.close();
+	}
+	function sendText(a,b) {
+		parent.elm('iPosting').value=a;
+		setTimeout("parent.hideFade('fTutupBuku');",100);
 	}
 	
 	if(elm('list')) {

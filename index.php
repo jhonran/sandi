@@ -2,8 +2,8 @@
 	// *********************************************
 	// File index.php
 	// *********************************************
-	
-	session_start();
+	error_reporting(0);
+	//session_start();
 	
 	require "includes/masterConfig.php";
 	

@@ -1,5 +1,6 @@
 <?php
-	session_start();
+	error_reporting(0);
+	//session_start();
 	
 	require "../includes/masterConfig.php";
 	
@@ -15,9 +16,10 @@
 		exit;
 	}
 	else {
+		
 		$_SESSION['waktu']=time()+1800;
 		
-			
+		$statTutupBuku=getValue("stat_hapus_trans","t_user","id_user='".$_SESSION['user']."'");
 		$startTrans=getValue("max(t)","(
 												(select DATE_ADD(tgl_finish,INTERVAL 1 DAY) AS t from t_posting where 1=1 order by tgl_finish desc limit 1)
 												UNION
@@ -173,7 +175,11 @@ table input[type=text], table input[type=password],  table select { width:400px;
 		$a=queryDb($sql." limit ".$paging['start'].",".$row);
 		while($b=mysql_fetch_array($a)) {
 			$paging['start']++;
-			echo "<ul id=\"".$b['id_posting']."\"><li>".$paging['start'].".</li><li>".$b['id_posting']."</li><li>".tglIndo($b['tgl_start'])."</li><li>".tglIndo($b['tgl_finish'])."</li></ul>";
+			echo "<input type=\"hidden\" id=\"tIdPosting-".$b['id_posting']."\" value=\"".$b['id_posting']."\" />";
+			echo "<input type=\"hidden\" id=\"tTanggal-".$b['tgl_finish']."\" value=\"".$b['tgl_finish']."\" />";
+			echo "<ul id=\"".$b['id_posting']."\" onclick=\"listFocus(this,'edit=1,del=".(!$_EXC[$b['id_posting']])."')\"><li>".$paging['start'].".</li><li>".$b['id_posting']."</li><li>".tglIndo($b['tgl_start'])."</li><li>".tglIndo($b['tgl_finish'])."</li></ul>";
+			if($_GT['edit']==$b['id_posting']) $jsEdit="listFocus(elm('".$b['id_posting']."'),'edit=1,del=".$b['id_posting']."');";
+		
 		}
 	}
 	?>
@@ -202,7 +208,9 @@ table input[type=text], table input[type=password],  table select { width:400px;
 			<span style="margin-right:40px;"><?=$paging['show']?></span><?=(($paging['page'])?"<span>Page :</span>".$paging['page']:"")?>
         </li>
     	<li class="r" style="width:auto;">
-    	  <button id="btn-new" class="icon-new" onclick="newData('x');">TAMBAH</button>
+		  <?=($statTutupBuku==1)?"<button id=\"btn-new\" class=\"icon-new\" onclick=\"newData('x');\">TAMBAH</button>":""?>
+    	  <button id="btn-edit" class="icon-edit" onclick="editData('tIdPosting');">EDIT</button>
+		  
         </li>
     </ol>
 </div>

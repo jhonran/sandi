@@ -1,5 +1,5 @@
 <?php
-	//session_start();
+	session_start();
 	// ***************************************************
 	// File masterConfig.php
 	// File ini akan diperlukan oleh file-file php lainnya

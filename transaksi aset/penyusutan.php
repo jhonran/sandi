@@ -1,5 +1,6 @@
 <?php
-	session_start();
+	error_reporting(0);
+	//session_start();
 	
 	require "../includes/masterConfig.php";
 	
@@ -48,7 +49,7 @@
 			$tDesc=$_PT['tDesc'];
 			$tBatas=$_PT['tBatas'];	
 			
-			$errtTanggal=(!balikTanggal($tTanggal))?"Format Tanggal masih salah (DD/MM/YYYY)":((dateDiff(TANGGAL2,balikTanggal($tTanggal))<0)?"Tanggal tidak boleh lebih besar dari sekarang":((dateDiff(balikTanggal($tTanggal),$lastPosting)<=0)?"Tanggal harus lebih besar dari tanggal Tutup Buku":((dateDiff(balikTanggal($tTanggal),$lastSusut)<=0)?"Tanggal harus lebih besar dari tanggal Penyusutan Sebelumnya":((dateDiff(balikTanggal($tTanggal),$lastRev)<0)?"Tanggal tidak boleh lebih kecil dari Data Revisi Aset terakhir (".tglIndo($lastRev,2).")":""))));
+			//$errtTanggal=(!balikTanggal($tTanggal))?"Format Tanggal masih salah (DD/MM/YYYY)":((dateDiff(TANGGAL2,balikTanggal($tTanggal))<0)?"Tanggal tidak boleh lebih besar dari sekarang":((dateDiff(balikTanggal($tTanggal),$lastPosting)<=0)?"Tanggal harus lebih besar dari tanggal Tutup Buku":((dateDiff(balikTanggal($tTanggal),$lastSusut)<=0)?"Tanggal harus lebih besar dari tanggal Penyusutan Sebelumnya":((dateDiff(balikTanggal($tTanggal),$lastRev)<0)?"Tanggal tidak boleh lebih kecil dari Data Revisi Aset terakhir (".tglIndo($lastRev,2).")":""))));
 							
 			if(!$errtTanggal) {	
 				$a=queryDb("select id_aset,sum(nominal) as total_susut,count(1) as jml_susut from t_susut where no_trans<>'' group by id_aset");
