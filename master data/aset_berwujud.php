@@ -447,6 +447,14 @@ table input[type=text], table input[type=password],  table select { width:400px;
 		$a=queryDb($sql." limit ".$paging['start'].",".$row);
 		while($b=mysql_fetch_array($a)) {
 			$paging['start']++;
+			$asset_rev = "SELECT SUM(rev.masa_susut_tambah) as masa_susut, SUM(rev.nilai_tambah) as nilai_tambah, SUM(rev.residu_tambah) as nilai_residu FROM `t_aset_rev` as rev INNER JOIN t_aset as a ON a.id_aset = rev.id_aset WHERE a.id_aset = ".$b['id_aset']."";
+			$asset_data = queryDb($asset_rev);
+			
+			while($rev_data = mysql_fetch_array($asset_data)) {
+				$masa_susut = $rev_data['masa_susut'];
+				$nilai_tambah = $rev_data['nilai_tambah'];
+				$nilai_residu = $rev_data['nilai_residu'];
+			}
 			echo "<input type=\"hidden\" id=\"tId-".$b['id_aset']."\" value=\"".$b['id_aset']."\" />";
 			echo "<input type=\"hidden\" id=\"tNoBukti-".$b['id_aset']."\" value=\"".$b['no_bukti']."\" />";
 			echo "<input type=\"hidden\" id=\"tNama-".$b['id_aset']."\" value=\"".$b['nama']."\" />";
@@ -480,7 +488,7 @@ table input[type=text], table input[type=password],  table select { width:400px;
 						<li>".$b['nm_ruang']."</li>
 						<li>(".$b['masa_susut']."/".$b['jml_susut'].") ".PRDSUSUT."</li>
 						<li>".showRupiah2($b['nilai_perolehan'])."</li>
-						<li>".showRupiah2($b['nilai_aset'])."</li>
+						<li>".showRupiah2($b['nilai_aset'] + $nilai_tambah)."</li>
 					</ul>";
 		
 			if($_GT['edit']==$b['id_aset']) $jsEdit="listFocus(elm('".$b['id_aset']."'),'edit=".$b['stat_edit'].",no=".$b['stat_lepas'].",del=".$b['stat_delete'].",config=1');";

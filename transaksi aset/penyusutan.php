@@ -368,7 +368,7 @@ div#input table tr td.x ul li:nth-child(1) input[type=text].n { width:170px;text
     	<li class="r" style="width:auto;">
     	  <button id="btn-new" class="icon-new" onclick="elm('tIdTrans').value='<?=NOFAK?>';setTanggal('<?=date("d/m/Y")?>');newData('tId,tNoBukti,tDesc');">TAMBAH</button>
     	  <!--<button id="btn-edit" class="icon-edit disabled" onclick="editData('tId,tIdTrans,tNoBukti');">EDIT</button>-->
-    	  <?=($statHapusTrans==1)?"<button id=\"btn-del\" class=\"icon-del disabled\" onclick=\"delData('del,hal,sort,search,order');\">HAPUS</button>":""?>
+    	  <?=($statHapusTrans==1)?"<button id=\"btn-del\" class=\"icon-del\" onclick=\"delData('del,hal,sort,search,order');\">HAPUS</button>":""?>
           <button id="btn-search" class="icon-search disabled" onclick="viewJurnal();">VIEW</button>
     	</li>
     </ol>

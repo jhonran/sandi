@@ -115,10 +115,11 @@ while($b=mysql_fetch_array($a)) {
 $sql="SELECT t.tgl_trans,t.no_trans,t.keterangan,CONCAT(t.id_unit1,'.',t.id_unit2,'.',t.id_unit3) as unit,t.id_gl4,t.id_glx,t.nominal_d,t.nominal_c,if(g.db_cr='D',1,-1) as x
 			FROM t_glt t
 				inner join t_gl1 g on g.id_gl1=t.id_gl1
-			where concat(t.id_unit1,'.',t.id_unit2,'.',t.id_unit3) in ('".str_replace("#","','",$tUnit)."') and t.id_gl4 in ('".str_replace("#","','",$_GT['gl'])."') and t.no_trans_ref=t.no_trans and t.tgl_trans between '".balikTanggal($_GT['periode1'])." 00:00:00' and '".balikTanggal($_GT['periode2'])." 23:59:59'
-			order by t.tgl_trans,t.no_trans,t.nominal_d desc";
+			where concat(t.id_unit1,'.',t.id_unit2,'.',t.id_unit3) in ('".str_replace("#","','",$tUnit)."') and t.id_gl4 in ('".str_replace("#","','",$_GT['gl'])."') and t.tgl_trans between '".balikTanggal($_GT['periode1'])." 00:00:00' and '".balikTanggal($_GT['periode2'])." 23:59:59'
+			order by t.tgl_trans,t.no_trans,t.nominal_d, t.nominal_c desc";
 
 $a=queryDb($sql);
+$row_a = mysql_num_rows($a);
 while($b=mysql_fetch_array($a)) {
 	$_D[$b['no_trans']]['tgl_trans']=$b['tgl_trans'];
 	$_D[$b['no_trans']]['keterangan']=$b['keterangan'];

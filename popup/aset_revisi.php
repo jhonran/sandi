@@ -87,18 +87,30 @@
 		
 		if($_REV[0] && $xStatAktif==1 && $_PT['tSimpan']) {
 			$tTanggal=$_PT['tTanggal'];
-			$tMasaSusut=($_PT['tMasaSusut'])?$_PT['tMasaSusut']:0;
-			$tNominal=$_PT['tNominal'];
-			$tResidu=$_PT['tResidu'];
-			$tKeterangan=$_PT['tKeterangan'];
 			
-			$errtTanggal=(!balikTanggal($tTanggal))?"Format Tanggal masih salah (DD/MM/YYYY)":((dateDiff(TANGGAL2,balikTanggal($tTanggal))<0)?"Tanggal tidak boleh lebih besar dari sekarang":((dateDiff(balikTanggal($tTanggal),$lastPosting)<=0)?"Tanggal harus lebih besar dari tanggal Tutup Buku":((dateDiff(balikTanggal($tTanggal),$lastSusut)<=0)?"Tanggal harus lebih besar dari tanggal Penyusutan Sebelumnya":((dateDiff(balikTanggal($tTanggal),$_DATA['tgl'][0])<=0)?"Tanggal harus lebih besar dari tanggal Perolehan / Cutoff Penyusutan":""))));
-			$errtMasaSusut=($tMasaSusut && !is_numeric(clearRupiah($tMasaSusut)))?"Data Umur Manfaat bukan angka":(($tMasaSusut && ($tMasaSusut+array_sum($_DATA['masa_susut']))<$xJmlSusut)?"Umur Manfaat tidak boleh lebih kecil dari umur yang telah disusutkan":((!$tMasaSusut && !$tNominal && !$tResidu)?"Perubahan Masa Susut, Nilai, dan Residu masih kosong":""));
-			$errtNominal=($tNominal && !is_numeric(clearRupiah($tNominal)))?"Nilai Aset masih kosong atau bukan angka":(($tNominal && ((clearRupiah($tNominal)+array_sum($_DATA['nilai']))-(clearRupiah($tResidu)+array_sum($_DATA['residu'])))<$xTotalSusut)?"Nilai Aset tidak boleh lebih kecil dari Nilai yang telah disusutkan":"");
-			$errtResidu=($tResidu && !is_numeric(clearRupiah($tResidu)))?"Nilai Residu bukan angka":(($tResidu && ((clearRupiah($tNominal)+array_sum($_DATA['nilai']))<(clearRupiah($tResidu)+array_sum($_DATA['residu']))))?"Nilai Residu tidak boleh lebih besar dari Nilai Aset":"");
-			$errtKeterangan=(!$tKeterangan)?"Data Keterangan masih kosong":"";
-			
-			if(!$errtTanggal && !$errtMasaSusut && !$errtNominal && !$errtResidu && !$errtKeterangan) {
+			$tMetode = $_PT['metodeinput'];
+			if($tMetode == 1) {
+				$tMasaSusut=$_PT['tMasaSusut2'];
+				$tNominal=$_PT['tNominal2'];
+				$tResidu=$_PT['tResidu2'];
+				$tKeterangan=$_PT['tKeterangan'];
+				if(!$errtTanggal && !$errtMasaSusut && !$errtNominal && !$errtResidu && !$errtKeterangan) {
+				$tId=((getValue("id_aset_rev","t_aset_rev","1=1 order by id_aset_rev desc limit 0,1")*1)+1);
+				$tTanggal=balikTanggal($tTanggal);
+				
+				queryDb("insert into t_aset_rev(id_aset_rev,id_aset,tgl_rev,masa_susut_tambah,nilai_tambah,residu_tambah,keterangan,tanggal) 
+							values('".$tId."','".$_REV[0]."','".$tTanggal."','".clearRupiah(-abs($tMasaSusut))."','".clearRupiah(-abs($tNominal))."','".clearRupiah(-abs($tResidu))."','".$tKeterangan."','".TANGGAL."')");
+				queryDb("update t_aset set tanggal='".TANGGAL."' where id_aset='".$_REV[0]."'");
+				
+				header("location:?id=".bs64_e($_REV[0]));
+				exit;
+			}
+			} else {
+				$tMasaSusut=$_PT['tMasaSusut'];
+				$tNominal=$_PT['tNominal'];
+				$tResidu=$_PT['tResidu'];
+				$tKeterangan=$_PT['tKeterangan'];
+				if(!$errtTanggal && !$errtMasaSusut && !$errtNominal && !$errtResidu && !$errtKeterangan) {
 				$tId=((getValue("id_aset_rev","t_aset_rev","1=1 order by id_aset_rev desc limit 0,1")*1)+1);
 				$tTanggal=balikTanggal($tTanggal);
 				
@@ -109,6 +121,15 @@
 				header("location:?id=".bs64_e($_REV[0]));
 				exit;
 			}
+			}
+			
+			//$errtTanggal=(!balikTanggal($tTanggal))?"Format Tanggal masih salah (DD/MM/YYYY)":((dateDiff(TANGGAL2,balikTanggal($tTanggal))<0)?"Tanggal tidak boleh lebih besar dari sekarang":((dateDiff(balikTanggal($tTanggal),$lastPosting)<=0)?"Tanggal harus lebih besar dari tanggal Tutup Buku":((dateDiff(balikTanggal($tTanggal),$lastSusut)<=0)?"Tanggal harus lebih besar dari tanggal Penyusutan Sebelumnya":((dateDiff(balikTanggal($tTanggal),$lastSusut)<=0)?"Tanggal harus lebih besar dari tanggal Perolehan / Cutoff Penyusutan":""))));
+			//$errtMasaSusut=($tMasaSusut && !is_numeric(clearRupiah($tMasaSusut)))?"Data Umur Manfaat bukan angka":(($tMasaSusut && ($tMasaSusut+array_sum($_DATA['masa_susut']))<$xJmlSusut)?"Umur Manfaat tidak boleh lebih kecil dari umur yang telah disusutkan":((!$tMasaSusut && !$tNominal && !$tResidu)?"Perubahan Masa Susut, Nilai, dan Residu masih kosong":""));
+			//$errtNominal=($tNominal && !is_numeric(clearRupiah($tNominal)))?"Nilai Aset masih kosong atau bukan angka":(($tNominal && ((clearRupiah($tNominal)+array_sum($_DATA['nilai']))-(clearRupiah($tResidu)+array_sum($_DATA['residu'])))<$xTotalSusut)?"Nilai Aset tidak boleh lebih kecil dari Nilai yang telah disusutkan":"");
+			//$errtResidu=($tResidu && !is_numeric(clearRupiah($tResidu)))?"Nilai Residu bukan angka":(($tResidu && ((clearRupiah($tNominal)+array_sum($_DATA['nilai']))<(clearRupiah($tResidu)+array_sum($_DATA['residu']))))?"Nilai Residu tidak boleh lebih besar dari Nilai Aset":"");
+			///$errtKeterangan=(!$tKeterangan)?"Data Keterangan masih kosong":"";
+			
+			
 		}
 ?>
 <!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
@@ -149,12 +170,30 @@ table input[type=text], table input[type=password],  table select { width:400px;
         <li style="text-align:center;">
           <form action="" target="_self" method="post" onsubmit="showFade('load');">
               <table cellpadding="0" cellspacing="0">
-                <tr>
-                  <th colspan="3" class="title">FORM INPUT <?=strtoupper($titleHTML)?></th>
-                </tr>
-                <tr>
-                  <td colspan="3">&nbsp;</td>
-                </tr>
+				<thead>
+					<tr>
+						<th colspan="3" class="title">FORM INPUT <?=strtoupper($titleHTML)?></th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>Pilih Metode Input Aset &nbsp; &nbsp; &nbsp;</td>
+						<td>:</td>
+						<td>
+							<select name="metodeinput" id="metodeinput" onChange="showForm(this)">
+								<option value="null" selected>--Pilih Metode Input Aset</option>
+								<option value="0">Penambahan Nilai</option>
+								<option value="1">Pengurangan Nilai</option>
+							</select>
+						</td>
+					</tr>
+				</tbody>
+                
+				
+				
+                <tbody id="formshowselect" style="display:none">
+				
+				
                 <tr>
                   <td>TGL PERUBAHAN</td>
                   <td>:</td>
@@ -167,9 +206,17 @@ table input[type=text], table input[type=password],  table select { width:400px;
                   <td>UMUR MANFAAT</td>
                   <td>:</td>
                   <td>
-                    <input type="text" id="tMasaSusutAwal" value="<?=htmlentities(showRupiah2(array_sum($_DATA['masa_susut'])))?>" readonly="readonly" class="readonly" style="text-align:right;width:110px;" /> + 
-                    <input type="text" name="tMasaSusut" id="tMasaSusut" maxlength="3" value="<?=htmlentities($tMasaSusut)?>" required="required" onkeyup="hideFade('errtMasaSusut');sumangka(this,'tMasaSusut');" style="text-align:right;width:110px;" /> = 
-                    <input type="text" id="tMasaSusutAkhir" value="<?=htmlentities(showRupiah2(array_sum($_DATA['masa_susut'])+clearRupiah($tMasaSusut)))?>" readonly="readonly" class="readonly" style="text-align:right;width:130px;" />
+                    <input type="text" id="tMasaSusutAwal" value="<?=htmlentities(showRupiah2(array_sum($_DATA['masa_susut'])))?>" readonly="readonly" class="readonly" style="text-align:right;width:110px;" /> <div id="formshowselectplus" style="display:none">+</div> <div id="formshowselectminus" style="display:none">-</div>
+                    <div id="umurmanfaatplus" style="display:none">
+						<input type="text" name="tMasaSusut" id="tMasaSusut" maxlength="3" value="<?=htmlentities($tMasaSusut)?>" onkeyup="hideFade('errtMasaSusut');sumangka(this,'tMasaSusut');" style="text-align:right;width:110px;" /> = 
+						<input type="text" id="tMasaSusutAkhir" value="<?=htmlentities(array_sum($_DATA['masa_susut'])+clearRupiah($tMasaSusut))?>" readonly="readonly" class="readonly" style="text-align:right;width:130px;" />
+						<input type="hidden" name="masasusutminus" id="masasusutminus" style="text-align:right;width:130px;" />
+					</div>
+					<div id="umurmanfaatminus">
+						<input type="text" name="tMasaSusut2" id="tMasaSusut" maxlength="3" value="<?=htmlentities($tMasaSusut)?>" onkeyup="hideFade('errtMasaSusut');sumangka1(this,'tMasaSusut');" style="text-align:right;width:110px;" /> = 
+						<input type="text" id="tMasaSusutAkhir2" value="<?=htmlentities(array_sum($_DATA['masa_susut'])-clearRupiah($tMasaSusut))?>" readonly="readonly" class="readonly" style="text-align:right;width:130px;" />
+						<input type="hidden" name="masasusutminus" id="masasusutminus" style="text-align:right;width:130px;" />
+					</div>
                     <div id="errtMasaSusut" class="err"><?=$errtMasaSusut?></div>
                   </td>
                 </tr>
@@ -177,9 +224,17 @@ table input[type=text], table input[type=password],  table select { width:400px;
                   <td>NILAI ASET</td>
                   <td>:</td>
                   <td>
-                    <input type="text" id="tNominalAwal" value="<?=htmlentities(showRupiah2(array_sum($_DATA['nilai'])))?>" readonly="readonly" class="readonly" style="text-align:right;width:110px;" /> + 
-                    <input type="text" name="tNominal" id="tNominal" value="<?=htmlentities($tNominal)?>" maxlength="20" required="required" onkeyup="hideFade('errtNominal');sumangka(this,'tNominal');" style="text-align:right;width:110px;" /> = 
-                    <input type="text" id="tNominalAkhir" value="<?=htmlentities(showRupiah2(array_sum($_DATA['nilai'])+clearRupiah($tNominal)))?>" readonly="readonly" class="readonly" style="text-align:right;width:130px;" />
+                    <input type="text" id="tNominalAwal" value="<?=htmlentities(showRupiah2(array_sum($_DATA['nilai'])))?>" readonly="readonly" class="readonly" style="text-align:right;width:110px;" /> <div id="formshowselectplus1" style="display:none">+</div> <div id="formshowselectminus1" style="display:none">-</div>
+					<div id="nilaiasetplus">
+						<input type="text" name="tNominal" id="tNominal" value="<?=htmlentities($tNominal)?>" maxlength="20" onkeyup="hideFade('errtNominal');sumangka(this,'tNominal');" style="text-align:right;width:110px;" /> = 
+						<input type="text" id="tNominalAkhir" value="<?=htmlentities(showRupiah2(array_sum($_DATA['nilai'])+clearRupiah($tNominal)))?>" readonly="readonly" class="readonly" style="text-align:right;width:130px;" />
+						<input type="hidden" name="nilainilaiasetminus" id="nilainilaiasetminus" style="text-align:right;width:130px;" />
+					</div>
+                    <div id="nilaiasetminus">
+						<input type="text" name="tNominal2" id="tNominal" value="<?=htmlentities($tNominal)?>" maxlength="20" onkeyup="hideFade('errtNominal');sumangka1(this,'tNominal');" style="text-align:right;width:110px;" /> = 
+						<input type="text" id="tNominalAkhir2" value="<?=htmlentities(showRupiah2(array_sum($_DATA['nilai'])+clearRupiah($tNominal)))?>" readonly="readonly" class="readonly" style="text-align:right;width:130px;" />
+						<input type="hidden" name="nilainilaiasetminus" id="nilainilaiasetminus" style="text-align:right;width:130px;" />
+					</div>
                     <div id="errtNominal" class="err"><?=$errtNominal?></div>
                   </td>
                 </tr>
@@ -187,9 +242,17 @@ table input[type=text], table input[type=password],  table select { width:400px;
                   <td>NILAI RESIDU</td>
                   <td>:</td>
                   <td>
-                    <input type="text" id="tResiduAwal" value="<?=htmlentities(showRupiah2(array_sum($_DATA['residu'])))?>" readonly="readonly" class="readonly" style="text-align:right;width:110px;" /> + 
-                    <input type="text" name="tResidu" id="tResidu" value="<?=htmlentities($tResidu)?>" maxlength="20" required="required" onkeyup="hideFade('errtResidu');sumangka(this,'tResidu');" style="text-align:right;width:110px;" /> = 
-                    <input type="text" id="tResiduAkhir" value="<?=htmlentities(showRupiah2(array_sum($_DATA['residu'])+clearRupiah($tResidu)))?>" readonly="readonly" class="readonly" style="text-align:right;width:130px;" />
+                    <input type="text" id="tResiduAwal" value="<?=htmlentities(showRupiah2(array_sum($_DATA['residu'])))?>" readonly="readonly" class="readonly" style="text-align:right;width:110px;" /> <div id="formshowselectplus2" style="display:none">+</div> <div id="formshowselectminus2" style="display:none">-</div>
+					<div id="nilairesiduplus">
+						<input type="text" name="tResidu" id="tResidu" value="<?=htmlentities($tResidu)?>" maxlength="20" onkeyup="hideFade('errtResidu');sumangka(this,'tResidu');" style="text-align:right;width:110px;" /> = 
+						<input type="text" id="tResiduAkhir" value="<?=htmlentities(showRupiah2(array_sum($_DATA['residu'])+clearRupiah($tResidu)))?>" readonly="readonly" class="readonly" style="text-align:right;width:130px;" />
+						<input type="hidden" name="nilainilairesiduminus" id="nilainilairesiduminus" style="text-align:right;width:130px;" />
+					</div>
+                    <div id="nilairesiduminus">
+						<input type="text" name="tResidu2" id="tResidu" value="<?=htmlentities($tResidu)?>" maxlength="20" onkeyup="hideFade('errtResidu');sumangka1(this,'tResidu');" style="text-align:right;width:110px;" /> = 
+						<input type="text" id="tResiduAkhir2" value="<?=htmlentities(showRupiah2(array_sum($_DATA['residu'])+clearRupiah($tResidu)))?>" readonly="readonly" class="readonly" style="text-align:right;width:130px;" />
+						<input type="hidden" name="nilainilairesiduminus" id="nilainilairesiduminus" style="text-align:right;width:130px;" />
+					</div>
                     <div id="errtResidu" class="err"><?=$errtResidu?></div>
                   </td>
                 </tr>
@@ -208,6 +271,7 @@ table input[type=text], table input[type=password],  table select { width:400px;
                   </td>
                 </tr>
                 <tr>
+				
                 <tr>
                   <td>KETERANGAN</td>
                   <td>:</td>
@@ -224,6 +288,7 @@ table input[type=text], table input[type=password],  table select { width:400px;
                   	<input name="tSimpan" type="submit" class="icon-save" id="tSimpan" value="SIMPAN" />
                   	<input type="reset" id="tTutup" class="icon-no" onclick="hideFade('input'); return false;" value="TUTUP" /></th>
                 </tr>
+				</tbody>
               </table>
           </form>
         </li>
@@ -280,6 +345,52 @@ table input[type=text], table input[type=password],  table select { width:400px;
     <?php } ?>
 </div>
 <script language="javascript">
+	function showForm(form) {
+		console.log(form.value);
+		if(form.value == "0") {
+			document.getElementById('formshowselect').style.display = "block";
+			document.getElementById('formshowselectplus').style.display = "inline-block";
+			document.getElementById('formshowselectplus1').style.display = "inline-block";
+			document.getElementById('formshowselectplus2').style.display = "inline-block";
+			document.getElementById('umurmanfaatplus').style.display = "inline-block";
+			document.getElementById('nilaiasetplus').style.display = "inline-block";
+			document.getElementById('nilaiasetminus').style.display = "none";
+			document.getElementById('nilairesiduplus').style.display = "inline-block";
+			document.getElementById('nilairesiduminus').style.display = "none";
+			document.getElementById('umurmanfaatminus').style.display = "none";
+			document.getElementById('formshowselectminus').style.display = "none";
+			document.getElementById('formshowselectminus1').style.display = "none";
+			document.getElementById('formshowselectminus2').style.display = "none";
+		} else if(form.value == "1") {
+			document.getElementById('formshowselect').style.display = "block";
+			document.getElementById('formshowselectplus').style.display = "none";
+			document.getElementById('formshowselectplus1').style.display = "none";
+			document.getElementById('formshowselectplus2').style.display = "none";
+			document.getElementById('umurmanfaatplus').style.display = "none";
+			document.getElementById('nilaiasetplus').style.display = "none";
+			document.getElementById('nilaiasetminus').style.display = "inline-block";
+			document.getElementById('nilairesiduplus').style.display = "none";
+			document.getElementById('nilairesiduminus').style.display = "inline-block";
+			document.getElementById('umurmanfaatminus').style.display = "inline-block";
+			document.getElementById('formshowselectminus').style.display = "inline-block";
+			document.getElementById('formshowselectminus1').style.display = "inline-block";
+			document.getElementById('formshowselectminus2').style.display = "inline-block";
+		} else {
+			document.getElementById('formshowselect').style.display = "none";
+			document.getElementById('umurmanfaatplus').style.display = "none";
+			document.getElementById('umurmanfaatminus').style.display = "none";
+			document.getElementById('formshowselectplus').style.display = "none";
+			document.getElementById('formshowselectplus1').style.display = "none";
+			document.getElementById('formshowselectplus2').style.display = "none";
+			document.getElementById('formshowselectminus').style.display = "none";
+			document.getElementById('formshowselectminus1').style.display = "none";
+			document.getElementById('formshowselectminus2').style.display = "none";
+			document.getElementById('nilaiasetplus').style.display = "none";
+			document.getElementById('nilaiasetminus').style.display = "none";
+			document.getElementById('nilairesiduplus').style.display = "none";
+			document.getElementById('nilairesiduminus').style.display = "none";
+		}
+	}
 	function setTanggal(v) {
 		v=(v)?v:"<?=date("d/m/Y")?>";
 		
@@ -292,8 +403,19 @@ table input[type=text], table input[type=password],  table select { width:400px;
 	
 	function sumangka(e,t) {
 		valnominal(e);		
-		elm(t+'Akhir').value=shownominal(clearRupiah(elm(t+'Awal').value)+clearRupiah(elm(t).value));		
+		elm(t+'Akhir').value=shownominal(clearRupiah(elm(t+'Awal').value)+clearRupiah(elm(t).value));
+		elm('masasusutminus').value = elm('tMasaSusut').value;
+		elm('nilainilaiasetminus').value = elm('tNominal').value;
+		elm('nilainilairesiduminus').value = elm('tResidu').value;
 		elm('tNominalTotal').value=shownominal(clearRupiah(elm('tNominalAkhir').value)-clearRupiah(elm('tResiduAkhir').value));
+	}
+	function sumangka1(e,t) {
+		valnominal(e);
+		elm(t+'Akhir2').value=shownominal(clearRupiah(elm(t+'Awal').value)-clearRupiah(e.value));
+		elm('masasusutminus').value = elm('tMasaSusutAkhir2').value;
+		elm('nilainilaiasetminus').value = elm('tNominalAkhir2').value;
+		elm('nilainilairesiduminus').value = elm('tResiduAkhir2').value;
+		elm('tNominalTotal').value=shownominal(clearRupiah(elm('tNominalAkhir2').value)-clearRupiah(elm('tResiduAkhir2').value));
 	}
 	
 	setTanggal("<?=$tTanggal?>");

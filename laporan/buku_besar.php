@@ -155,6 +155,7 @@ table input[type=text], table input[type=password],  table select { width:315px;
 <script language="javascript">
 	function setUnit() {
 		var x=document.getElementsByName('tUnit[]');
+		console.log(x);
 		var units=new Array();
 		
 		for(var i=0;i<x.length;i++) { if(x[i].checked) units.push(x[i].value); }
@@ -184,7 +185,9 @@ table input[type=text], table input[type=password],  table select { width:315px;
 	setTanggal('<?=date("1/m/Y")?>','<?=date("d/m/Y")?>');
 	
 	function viewLap() {
-		if(!elm('iAkun').value) { alert('<?=strtoupper($_IST['gl1.php'])?> belum dipilih'); return false; }
+		var x=document.getElementsByName('iAkun');
+		console.log(x);
+		if(!elm('iAkun').value) { alert('<?=strtoupper($_IST['gl1.php'])?> belum dipilih'); return false; console.log(elm('iAkun').value); }
 		
 		if(windowPopUp['x']) windowPopUp['x'].close();
 		popUp('../popup/v_buku_besar.php?unit='+setUnit()+'&gl='+bs64_e(elm('iAkun').value)+'&periode1='+bs64_e(elm('tTanggal').value)+'&periode2='+bs64_e(elm('tTanggal2').value),1000,600,'x');
