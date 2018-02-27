@@ -124,8 +124,9 @@ table input[type=text], table input[type=password],  table select { width:400px;
                   <td>TGL TRANSAKSI</td>
                   <td>:</td>
                   <td>
-                    <input type="text" maxlength="10" autocomplete="off" required="required" style="width:140px" disabled="disabled" class="readonly" value="<?=str_replace("-","/",balikTanggal($startTrans))?>" /> s/d
-                    <input type="text" name="tTanggal" id="tTanggal" maxlength="10" onkeydown="return DateFormat(this,event.keyCode)" autocomplete="off" required="required" style="width:140px" onkeyup="hideFade('errtTanggal')" />
+					
+                    <input type="text" id="tTanggalAwal" maxlength="10" autocomplete="off" required="required" style="width:140px" disabled="disabled" class="readonly" value="<?=str_replace("-","/",balikTanggal($startTrans))?>" /> s/d
+                    <input type="text" name="tTanggal" id="tTanggal" value="" />
                     <div id="errtTanggal" class="err"><?=$errtTanggal?></div>
                   </td>
                 </tr>
@@ -176,7 +177,8 @@ table input[type=text], table input[type=password],  table select { width:400px;
 		while($b=mysql_fetch_array($a)) {
 			$paging['start']++;
 			echo "<input type=\"hidden\" id=\"tIdPosting-".$b['id_posting']."\" value=\"".$b['id_posting']."\" />";
-			echo "<input type=\"hidden\" id=\"tTanggal-".$b['tgl_finish']."\" value=\"".$b['tgl_finish']."\" />";
+			echo "<input type=\"hidden\" id=\"tTanggalAwal-".$b['id_posting']."\" value=\"".$b['tgl_start']."\" />";
+			echo "<input type=\"hidden\" id=\"tTanggal-".$b['id_posting']."\" value=\"".$b['tgl_finish']."\" />";
 			echo "<ul id=\"".$b['id_posting']."\" onclick=\"listFocus(this,'edit=1,del=".(!$_EXC[$b['id_posting']])."')\"><li>".$paging['start'].".</li><li>".$b['id_posting']."</li><li>".tglIndo($b['tgl_start'])."</li><li>".tglIndo($b['tgl_finish'])."</li></ul>";
 			if($_GT['edit']==$b['id_posting']) $jsEdit="listFocus(elm('".$b['id_posting']."'),'edit=1,del=".$b['id_posting']."');";
 		
@@ -209,7 +211,7 @@ table input[type=text], table input[type=password],  table select { width:400px;
         </li>
     	<li class="r" style="width:auto;">
 		  <?=($statTutupBuku==1)?"<button id=\"btn-new\" class=\"icon-new\" onclick=\"newData('x');\">TAMBAH</button>":""?>
-    	  <button id="btn-edit" class="icon-edit" onclick="editData('tIdPosting');">EDIT</button>
+    	  <button id="btn-edit" class="icon-edit" onclick="editData('tIdPosting,tTanggal,tTanggalAwal');">EDIT</button>
 		  
         </li>
     </ol>

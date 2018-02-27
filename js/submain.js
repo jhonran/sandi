@@ -61,6 +61,7 @@ function goFrame(v,u) {
 }
 
 function delData(v,b) {
+	console.log(b);
 	var b=(b)?b:"del";
 	
 	if(_URI[b]) {

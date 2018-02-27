@@ -1,7 +1,6 @@
 <?php
-	error_reporting(0);
 	//session_start();
-	
+	error_reporting(0);
 	require "../includes/masterConfig.php";
 	
 	$titleHTML=getValue("s.judul","t_user u
@@ -49,7 +48,7 @@
 			$tDesc=$_PT['tDesc'];
 			$tBatas=$_PT['tBatas'];	
 			
-			//$errtTanggal=(!balikTanggal($tTanggal))?"Format Tanggal masih salah (DD/MM/YYYY)":((dateDiff(TANGGAL2,balikTanggal($tTanggal))<0)?"Tanggal tidak boleh lebih besar dari sekarang":((dateDiff(balikTanggal($tTanggal),$lastPosting)<=0)?"Tanggal harus lebih besar dari tanggal Tutup Buku":((dateDiff(balikTanggal($tTanggal),$lastSusut)<=0)?"Tanggal harus lebih besar dari tanggal Penyusutan Sebelumnya":((dateDiff(balikTanggal($tTanggal),$lastRev)<0)?"Tanggal tidak boleh lebih kecil dari Data Revisi Aset terakhir (".tglIndo($lastRev,2).")":""))));
+			$errtTanggal=(!balikTanggal($tTanggal))?"Format Tanggal masih salah (DD/MM/YYYY)":((dateDiff(TANGGAL2,balikTanggal($tTanggal))<0)?"Tanggal tidak boleh lebih besar dari sekarang":((dateDiff(balikTanggal($tTanggal),$lastPosting)<=0)?"Tanggal harus lebih besar dari tanggal Tutup Buku":((dateDiff(balikTanggal($tTanggal),$lastSusut)<=0)?"Tanggal harus lebih besar dari tanggal Penyusutan Sebelumnya":((dateDiff(balikTanggal($tTanggal),$lastRev)<0)?"Tanggal tidak boleh lebih kecil dari Data Revisi Aset terakhir (".tglIndo($lastRev,2).")":""))));
 							
 			if(!$errtTanggal) {	
 				$a=queryDb("select id_aset,sum(nominal) as total_susut,count(1) as jml_susut from t_susut where no_trans<>'' group by id_aset");
@@ -334,10 +333,10 @@ div#input table tr td.x ul li:nth-child(1) input[type=text].n { width:170px;text
 			echo "<input type=\"hidden\" id=\"tId-".$b['no_trans']."\" value=\"".$b['no_trans']."\" />";
 			echo "<input type=\"hidden\" id=\"tIdTrans-".$b['no_trans']."\" value=\"".$b['no_trans']."\" />";
 			echo "<input type=\"hidden\" id=\"tNoBukti-".$b['no_trans']."\" value=\"".$b['nama']."\" />";
-			echo "<ul id=\"".$b['no_trans']."\" onclick=\"listFocus(this,'edit=1,del=".$b['stat_delete'].",search=1')\" ondblclick=\"_URI['id1']='".$b['no_trans']."';_URI['order1']='".$_GT['order']."';goAddress('id1,order1,hal,sort,search','penyusutan_detail.php')\"><li>".$paging['start'].".</li><li>".tglIndo(balikTanggal($b['tgl_trans']),2)."</li><li>".$b['no_trans']."</li><li>".$b['no_bukti']."</li>
+			echo "<ul id=\"".$b['no_trans']."\" onclick=\"listFocus(this,'edit=1,del=1,search=1')\" ondblclick=\"_URI['id1']='".$b['no_trans']."';_URI['order1']='".$_GT['order']."';goAddress('id1,order1,hal,sort,search','penyusutan_detail.php')\"><li>".$paging['start'].".</li><li>".tglIndo(balikTanggal($b['tgl_trans']),2)."</li><li>".$b['no_trans']."</li><li>".$b['no_bukti']."</li>
 					<li>".$b['keterangan']."</li><li>".showRupiah2($b['nominal'])."</li></ul>";
 		
-			if($_GT['edit']==$b['no_trans']) $jsEdit="listFocus(elm('".$b['no_trans']."'),'edit=1,del=".$b['stat_delete'].",search=1');";
+			if($_GT['edit']==$b['no_trans']) $jsEdit="listFocus(elm('".$b['no_trans']."'),'edit=1,del=1,search=1');";
 		}
 	}
 	?>
@@ -368,7 +367,7 @@ div#input table tr td.x ul li:nth-child(1) input[type=text].n { width:170px;text
     	<li class="r" style="width:auto;">
     	  <button id="btn-new" class="icon-new" onclick="elm('tIdTrans').value='<?=NOFAK?>';setTanggal('<?=date("d/m/Y")?>');newData('tId,tNoBukti,tDesc');">TAMBAH</button>
     	  <!--<button id="btn-edit" class="icon-edit disabled" onclick="editData('tId,tIdTrans,tNoBukti');">EDIT</button>-->
-    	  <?=($statHapusTrans==1)?"<button id=\"btn-del\" class=\"icon-del\" onclick=\"delData('del,hal,sort,search,order');\">HAPUS</button>":""?>
+    	  <?=($statHapusTrans==1)?"<button id=\"btn-del\" class=\"icon-del disabled\" onclick=\"delData('del,hal,sort,search,order');\">HAPUS</button>":""?>
           <button id="btn-search" class="icon-search disabled" onclick="viewJurnal();">VIEW</button>
     	</li>
     </ol>

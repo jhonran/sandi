@@ -91,15 +91,15 @@
 			$tMetode = $_PT['metodeinput'];
 			if($tMetode == 1) {
 				$tMasaSusut=$_PT['tMasaSusut2'];
-				$tNominal=$_PT['tNominal2'];
-				$tResidu=$_PT['tResidu2'];
+				$tNominal=$_PT['nilainilaiasetminus2'];
+				$tResidu=$_PT['nilainilairesiduminus2'];
 				$tKeterangan=$_PT['tKeterangan'];
 				if(!$errtTanggal && !$errtMasaSusut && !$errtNominal && !$errtResidu && !$errtKeterangan) {
 				$tId=((getValue("id_aset_rev","t_aset_rev","1=1 order by id_aset_rev desc limit 0,1")*1)+1);
 				$tTanggal=balikTanggal($tTanggal);
 				
 				queryDb("insert into t_aset_rev(id_aset_rev,id_aset,tgl_rev,masa_susut_tambah,nilai_tambah,residu_tambah,keterangan,tanggal) 
-							values('".$tId."','".$_REV[0]."','".$tTanggal."','".clearRupiah(-abs($tMasaSusut))."','".clearRupiah(-abs($tNominal))."','".clearRupiah(-abs($tResidu))."','".$tKeterangan."','".TANGGAL."')");
+							values('".$tId."','".$_REV[0]."','".$tTanggal."','".clearRupiah(-abs($tMasaSusut))."','".clearRupiah($tNominal)."','".clearRupiah($tResidu)."','".$tKeterangan."','".TANGGAL."')");
 				queryDb("update t_aset set tanggal='".TANGGAL."' where id_aset='".$_REV[0]."'");
 				
 				header("location:?id=".bs64_e($_REV[0]));
@@ -228,12 +228,12 @@ table input[type=text], table input[type=password],  table select { width:400px;
 					<div id="nilaiasetplus">
 						<input type="text" name="tNominal" id="tNominal" value="<?=htmlentities($tNominal)?>" maxlength="20" onkeyup="hideFade('errtNominal');sumangka(this,'tNominal');" style="text-align:right;width:110px;" /> = 
 						<input type="text" id="tNominalAkhir" value="<?=htmlentities(showRupiah2(array_sum($_DATA['nilai'])+clearRupiah($tNominal)))?>" readonly="readonly" class="readonly" style="text-align:right;width:130px;" />
-						<input type="hidden" name="nilainilaiasetminus" id="nilainilaiasetminus" style="text-align:right;width:130px;" />
+						<input type="hidden" name="nilainilaiasetminus" id="nilainilaiasetminus" />
 					</div>
                     <div id="nilaiasetminus">
-						<input type="text" name="tNominal2" id="tNominal" value="<?=htmlentities($tNominal)?>" maxlength="20" onkeyup="hideFade('errtNominal');sumangka1(this,'tNominal');" style="text-align:right;width:110px;" /> = 
+						<input type="text" name="tNominal2" id="tNominal2" value="<?=htmlentities($tNominal)?>" maxlength="20" onkeyup="hideFade('errtNominal');sumangka1(this,'tNominal');" style="text-align:right;width:110px;" /> = 
 						<input type="text" id="tNominalAkhir2" value="<?=htmlentities(showRupiah2(array_sum($_DATA['nilai'])+clearRupiah($tNominal)))?>" readonly="readonly" class="readonly" style="text-align:right;width:130px;" />
-						<input type="hidden" name="nilainilaiasetminus" id="nilainilaiasetminus" style="text-align:right;width:130px;" />
+						<input type="hidden" name="nilainilaiasetminus2" id="nilaiasetminus2" />
 					</div>
                     <div id="errtNominal" class="err"><?=$errtNominal?></div>
                   </td>
@@ -249,9 +249,9 @@ table input[type=text], table input[type=password],  table select { width:400px;
 						<input type="hidden" name="nilainilairesiduminus" id="nilainilairesiduminus" style="text-align:right;width:130px;" />
 					</div>
                     <div id="nilairesiduminus">
-						<input type="text" name="tResidu2" id="tResidu" value="<?=htmlentities($tResidu)?>" maxlength="20" onkeyup="hideFade('errtResidu');sumangka1(this,'tResidu');" style="text-align:right;width:110px;" /> = 
+						<input type="text" name="tResidu2" id="tResidu2" value="<?=htmlentities($tResidu)?>" maxlength="20" onkeyup="hideFade('errtResidu');sumangka1(this,'tResidu');" style="text-align:right;width:110px;" /> = 
 						<input type="text" id="tResiduAkhir2" value="<?=htmlentities(showRupiah2(array_sum($_DATA['residu'])+clearRupiah($tResidu)))?>" readonly="readonly" class="readonly" style="text-align:right;width:130px;" />
-						<input type="hidden" name="nilainilairesiduminus" id="nilainilairesiduminus" style="text-align:right;width:130px;" />
+						<input type="hidden" name="nilainilairesiduminus2" id="nilairesiduminus2" style="text-align:right;width:130px;" />
 					</div>
                     <div id="errtResidu" class="err"><?=$errtResidu?></div>
                   </td>
@@ -404,17 +404,20 @@ table input[type=text], table input[type=password],  table select { width:400px;
 	function sumangka(e,t) {
 		valnominal(e);		
 		elm(t+'Akhir').value=shownominal(clearRupiah(elm(t+'Awal').value)+clearRupiah(elm(t).value));
-		elm('masasusutminus').value = elm('tMasaSusut').value;
-		elm('nilainilaiasetminus').value = elm('tNominal').value;
-		elm('nilainilairesiduminus').value = elm('tResidu').value;
 		elm('tNominalTotal').value=shownominal(clearRupiah(elm('tNominalAkhir').value)-clearRupiah(elm('tResiduAkhir').value));
 	}
 	function sumangka1(e,t) {
 		valnominal(e);
 		elm(t+'Akhir2').value=shownominal(clearRupiah(elm(t+'Awal').value)-clearRupiah(e.value));
+		var nominalAkhir = elm('tNominal2').value;
+		var nominalAkhir = nominalAkhir.replace(".","");
+		var nilaiNominalAkhir = parseInt(nominalAkhir);
+		var nominalResidus = elm('tResidu2').value;
+		var nominalResidus = nominalResidus.replace(".","");
+		var nilaiNominalResidus = parseInt(nominalResidus);
 		elm('masasusutminus').value = elm('tMasaSusutAkhir2').value;
-		elm('nilainilaiasetminus').value = elm('tNominalAkhir2').value;
-		elm('nilainilairesiduminus').value = elm('tResiduAkhir2').value;
+		elm('nilaiasetminus2').value = -Math.abs(nilaiNominalAkhir);
+		elm('nilairesiduminus2').value = -Math.abs(nilaiNominalResidus);
 		elm('tNominalTotal').value=shownominal(clearRupiah(elm('tNominalAkhir2').value)-clearRupiah(elm('tResiduAkhir2').value));
 	}
 	
