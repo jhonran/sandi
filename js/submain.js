@@ -11,6 +11,7 @@ function listFocusLoop(e) {
 }
 
 function listFocus(e,v) {
+	console.log(e);
 	if(e.className!="disabled") {
 		
 		listFocusLoop(elm('list'));

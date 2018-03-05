@@ -1,6 +1,6 @@
 <?php
-	session_start();
-	
+	//session_start();
+	error_reporting(0);
 	require "../includes/masterConfig.php";
 	
 	$titleHTML=getValue("s.judul","t_user u

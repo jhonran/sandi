@@ -49,6 +49,7 @@ function hideFade(e,f) {
 		
 		timerEfek[e]=setTimeout("hideFade('"+e+"',\""+f+"\")",50);
 	}
+	
 }
 
 function menuSub(e,h,v,s) {

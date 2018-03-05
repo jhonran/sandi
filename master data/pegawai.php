@@ -17,7 +17,19 @@
 	}
 	else {
 		$_SESSION['waktu']=time()+1800;
-		
+		$idAkses = getValue("id_akses","t_user","id_user='".$_SESSION['user']."'");
+		if($idAkses !== '01') {
+			$firstdate = date("Y-m-01");
+			$today = date("Y-m-d");
+			$aPosting = "SELECT tgl_finish FROM `t_posting` WHERE tgl_finish BETWEEN '".$firstdate."' AND '".$today."' ORDER BY tgl_finish DESC LIMIT 1";
+			$bPosting = queryDb($aPosting);
+			$cPosting = mysql_num_rows($bPosting);
+			if($cPosting == 0) {
+				$statPosting = '0';
+			} else {
+				$statPosting = '1';
+			}
+		}
 		if($_GT['del']) {
 			if(!getValue("1","t_panjar","id_pegawai='".$_GT['del']."' limit 0,1")) {
 				queryDb("delete from t_pegawai where id_pegawai='".$_GT['del']."'");
@@ -213,9 +225,34 @@ table input[type=text], table input[type=password],  table select { width:400px;
 			<span style="margin-right:40px;"><?=$paging['show']?></span><?=(($paging['page'])?"<span>Page :</span>".$paging['page']:"")?>
         </li>
     	<li class="r" style="width:auto;">
-    	  <button id="btn-new" class="icon-new" onclick="newData('tId,tIdPegawai,tNama,tJabatan,tStatPeg');">TAMBAH</button>
-    	  <button id="btn-edit" class="icon-edit disabled" onclick="editData('tId,tIdPegawai,tNama,tJabatan,tStatPeg');">EDIT</button>
-    	  <button id="btn-del" class="icon-del disabled" onclick="delData('del,hal,sort,search,order');">HAPUS</button>
+		  <?php 
+			if($idAkses !== "01") {
+				if($statPosting == '1') {
+		  ?>
+			<button id="btn-new" class="icon-new" disabled>TAMBAH</button>
+			<button id="btn-edit" class="icon-edit disabled" disabled>EDIT</button>
+			<button id="btn-del" class="icon-del disabled" disabled>HAPUS</button>
+		  <?php
+				} else {
+		  ?>
+		  <button id="btn-new" class="icon-new" onclick="newData('tId,tIdPegawai,tNama,tJabatan,tStatPeg');">TAMBAH</button>
+			<button id="btn-edit" class="icon-edit disabled" onclick="editData('tId,tIdPegawai,tNama,tJabatan,tStatPeg');">EDIT</button>
+			<button id="btn-del" class="icon-del disabled" onclick="delData('del,hal,sort,search,order');">HAPUS</button>
+			
+          <?php		  
+				}
+		  ?>
+			
+		  <?php
+			} else {
+		  ?>
+			<button id="btn-new" class="icon-new" onclick="newData('tId,tIdPegawai,tNama,tJabatan,tStatPeg');">TAMBAH</button>
+			<button id="btn-edit" class="icon-edit disabled" onclick="editData('tId,tIdPegawai,tNama,tJabatan,tStatPeg');">EDIT</button>
+			<button id="btn-del" class="icon-del disabled" onclick="delData('del,hal,sort,search,order');">HAPUS</button>
+		  <?php
+			} 
+		  ?>
+		  
         </li>
     </ol>
 </div>

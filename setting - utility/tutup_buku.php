@@ -28,43 +28,53 @@
 		if($_PT['tSimpan']) {
 			$tIdPosting=$_PT['tIdPosting'];
 			$tTanggal=$_PT['tTanggal'];
+			$tTanggalAwal=$_PT['tTanggalAwal'];
 			
-			$errtTanggal=(!balikTanggal($tTanggal))?"Format Tanggal masih salah (DD/MM/YYYY)":((dateDiff(TANGGAL2,balikTanggal($tTanggal))<0)?"Tanggal tidak boleh lebih besar dari sekarang":((dateDiff(balikTanggal($tTanggal),$startTrans)<0)?"Minimal Tgl Posting ".tglIndo($startTrans):""));
+			//$errtTanggal=(!balikTanggal($tTanggal))?"Format Tanggal masih salah (DD/MM/YYYY)":((dateDiff(TANGGAL2,balikTanggal($tTanggal))<0)?"Tanggal tidak boleh lebih besar dari sekarang":((dateDiff(balikTanggal($tTanggal),$startTrans)<0)?"Minimal Tgl Posting ".tglIndo($startTrans):""));
 			
-			if(!$errtTanggal && $startTrans) {				
+			if(!$errtTanggal && $startTrans) {
 				$tId=substr(((getValue("id_posting","t_posting","1=1 order by id_posting desc limit 0,1")*1)+101),1,2);
+				$sqlPosting = "SELECT * FROM t_posting WHERE id_posting = '".$tIdPosting."'";
+				$dataPost = queryDb($sqlPosting);
 				$tTanggal=balikTanggal($tTanggal);
+				$tTanggalAwal=balikTanggal($tTanggalAwal);
+				if(mysql_num_rows($dataPost) == 0) {
+					queryDb("insert into t_posting(id_posting,tgl_start,tgl_finish,tanggal,id_user) values('".$tId."','".$tTanggalAwal."','".$tTanggal."','".TANGGAL."','".$_SESSION['user']."')");
 				
-				queryDb("insert into t_posting(id_posting,tgl_start,tgl_finish,tanggal,id_user) values('".$tId."','".$startTrans."','".$tTanggal."','".TANGGAL."','".$_SESSION['user']."')");
-				
-				queryDb("insert into t_glu(id_unit1,id_unit2,id_unit3,id_gl1,id_gl2,id_gl3,id_gl4,id_aruskas,id_aruskas_sub,nama,saldo_awal,mutasi_d,mutasi_c,saldo,tanggal)
+					queryDb("insert into t_glu(id_unit1,id_unit2,id_unit3,id_gl1,id_gl2,id_gl3,id_gl4,id_aruskas,id_aruskas_sub,nama,saldo_awal,mutasi_d,mutasi_c,saldo,tanggal)
 							select t.id_unit1,t.id_unit2,t.id_unit3,g.id_gl1,g.id_gl2,g.id_gl3,g.id_gl4,g.id_aruskas,g.id_aruskas_sub,g.nama,'0','0','0','0','".TANGGAL2."'
 									from t_gl4 g
-										inner join t_glt t on t.id_gl4=g.id_gl4 and t.tgl_trans between '".$startTrans." 00:00:00' and '".$tTanggal." 23:59:59'
+										inner join t_glt t on t.id_gl4=g.id_gl4 and t.tgl_trans between '".$tTanggalAwal." 00:00:00' and '".$tTanggal." 23:59:59'
 										left join t_glu u on u.id_unit1=t.id_unit1 and u.id_unit2=t.id_unit2 and u.id_unit3=t.id_unit3 and u.id_gl4=g.id_gl4
 									where u.id_gl4 is null
 									group by t.id_unit1,t.id_unit2,t.id_unit3,g.id_gl1,g.id_gl2,g.id_gl3,g.id_gl4,g.id_aruskas,g.id_aruskas_sub,g.nama");
 								
-				queryDb("update t_glu u 
+					queryDb("update t_glu u 
 										inner join t_gl1 g1 on g1.id_gl1=u.id_gl1 
 										inner join (
 														select id_unit1,id_unit2,id_unit3,id_gl4,sum(nominal_d) as nominal_d,sum(nominal_c) as nominal_c from (
 																(select id_unit1,id_unit2,id_unit3,id_gl4,sum(nominal_d) as nominal_d,sum(nominal_c) as nominal_c from t_glt
-																		where tgl_trans between '".$startTrans." 00:00:00' and '".$tTanggal." 23:59:59'
+																		where tgl_trans between '".$tTanggalAwal." 00:00:00' and '".$tTanggal." 23:59:59'
 																		group by id_unit1,id_unit2,id_unit3,id_gl4)
 																union
 																(select id_unit1,id_unit2,id_unit3,id_glx as id_gl4,sum(nominal_d) as nominal_d,sum(nominal_c) as nominal_c from t_glt
-																		where id_glx<>'' and tgl_trans between '".$startTrans." 00:00:00' and '".$tTanggal." 23:59:59'
+																		where id_glx<>'' and tgl_trans between '".$tTanggalAwal." 00:00:00' and '".$tTanggal." 23:59:59'
 																		group by id_unit1,id_unit2,id_unit3,id_glx)
 															) x
 															group by id_unit1,id_unit2,id_unit3,id_gl4																
 													) t on t.id_unit1=u.id_unit1 and t.id_unit2=u.id_unit2 and t.id_unit3=u.id_unit3 and t.id_gl4=u.id_gl4
 									set u.mutasi_d=(u.mutasi_d+t.nominal_d),u.mutasi_c=(u.mutasi_c+t.nominal_c),u.saldo=(u.saldo+((t.nominal_d-t.nominal_c)*if(g1.db_cr='D',1,-1)))");
 				
-				queryDb("insert into t_gluh(id_unit1,id_unit2,id_unit3,id_gl1,id_gl2,id_gl3,id_gl4,id_aruskas,id_aruskas_sub,nama,saldo_awal,mutasi_d,mutasi_c,saldo,tanggal)
+					queryDb("insert into t_gluh(id_unit1,id_unit2,id_unit3,id_gl1,id_gl2,id_gl3,id_gl4,id_aruskas,id_aruskas_sub,nama,saldo_awal,mutasi_d,mutasi_c,saldo,tanggal)
 								select id_unit1,id_unit2,id_unit3,id_gl1,id_gl2,id_gl3,id_gl4,id_aruskas,id_aruskas_sub,nama,saldo_awal,mutasi_d,mutasi_c,saldo,'".$tTanggal."' from t_glu");
 								
-				queryDb("update t_glu set saldo_awal=saldo,mutasi_d=0,mutasi_c=0,tanggal='".$tTanggal."'");
+					queryDb("update t_glu set saldo_awal=saldo,mutasi_d=0,mutasi_c=0,tanggal='".$tTanggal."'");
+				} else {
+					queryDb("update t_posting set tgl_start='".$tTanggalAwal."',tgl_finish='".$tTanggal."',tanggal='".TANGGAL."',id_user='".$_SESSION['user']."' where id_posting='".$tIdPosting."'");
+				}
+				
+				
+				
 				
 				header("location:?edit=".bs64_e($tId));
 				exit;
@@ -113,19 +123,13 @@ table input[type=text], table input[type=password],  table select { width:400px;
                 <tr>
                   <td colspan="3">&nbsp;</td>
                 </tr>
-                <tr>
-                  <td>ID POSTING</td>
-                  <td>:</td>
-                  <td><input type="hidden" id="x" />
-                    <input type="text" name="tIdPosting" id="tIdPosting" value="<?=substr(((getValue("id_posting","t_posting","1=1 order by id_posting desc limit 0,1")*1)+101),1,2)?>" maxlength="2" class="readonly" readonly="readonly" />
-                  </td>
-                </tr>
+                <input type="hidden" id="x" />
+                     <input type="hidden" name="tIdPosting" id="tIdPosting" value="<?=substr(((getValue("id_posting","t_posting","1=1 order by id_posting desc limit 0,1")*1)+101),1,2)?>" maxlength="2" class="readonly" readonly="readonly" />
                 <tr>
                   <td>TGL TRANSAKSI</td>
                   <td>:</td>
                   <td>
-					
-                    <input type="text" id="tTanggalAwal" maxlength="10" autocomplete="off" required="required" style="width:140px" disabled="disabled" class="readonly" value="<?=str_replace("-","/",balikTanggal($startTrans))?>" /> s/d
+                    <input type="text" name="tTanggalAwal" id="tTanggalAwal" style="width:140px" value="" /> s/d
                     <input type="text" name="tTanggal" id="tTanggal" value="" />
                     <div id="errtTanggal" class="err"><?=$errtTanggal?></div>
                   </td>
@@ -143,6 +147,7 @@ table input[type=text], table input[type=password],  table select { width:400px;
         </li>
     </ul>
 </div>
+
 <div id="titleTop">
   	<ol><li><?=strtoupper($titleHTML)?></li></ol>
 	<ol class="title">
@@ -177,8 +182,8 @@ table input[type=text], table input[type=password],  table select { width:400px;
 		while($b=mysql_fetch_array($a)) {
 			$paging['start']++;
 			echo "<input type=\"hidden\" id=\"tIdPosting-".$b['id_posting']."\" value=\"".$b['id_posting']."\" />";
-			echo "<input type=\"hidden\" id=\"tTanggalAwal-".$b['id_posting']."\" value=\"".$b['tgl_start']."\" />";
-			echo "<input type=\"hidden\" id=\"tTanggal-".$b['id_posting']."\" value=\"".$b['tgl_finish']."\" />";
+			echo "<input type=\"hidden\" id=\"tTanggalAwal-".$b['id_posting']."\" value=\"".date('d/m/Y', strtotime($b['tgl_start']))."\" />";
+			echo "<input type=\"hidden\" id=\"tTanggal-".$b['id_posting']."\" value=\"".date('d/m/Y', strtotime($b['tgl_finish']))."\" />";
 			echo "<ul id=\"".$b['id_posting']."\" onclick=\"listFocus(this,'edit=1,del=".(!$_EXC[$b['id_posting']])."')\"><li>".$paging['start'].".</li><li>".$b['id_posting']."</li><li>".tglIndo($b['tgl_start'])."</li><li>".tglIndo($b['tgl_finish'])."</li></ul>";
 			if($_GT['edit']==$b['id_posting']) $jsEdit="listFocus(elm('".$b['id_posting']."'),'edit=1,del=".$b['id_posting']."');";
 		
@@ -210,8 +215,8 @@ table input[type=text], table input[type=password],  table select { width:400px;
 			<span style="margin-right:40px;"><?=$paging['show']?></span><?=(($paging['page'])?"<span>Page :</span>".$paging['page']:"")?>
         </li>
     	<li class="r" style="width:auto;">
-		  <?=($statTutupBuku==1)?"<button id=\"btn-new\" class=\"icon-new\" onclick=\"newData('x');\">TAMBAH</button>":""?>
-    	  <button id="btn-edit" class="icon-edit" onclick="editData('tIdPosting,tTanggal,tTanggalAwal');">EDIT</button>
+		  <?=($statTutupBuku==1)?"<button id=\"btn-new\" class=\"icon-new\" onclick=\"newData('tIdPosting');\">TAMBAH</button>":""?>
+		  <?=($statTutupBuku==1)?"<button id=\"btn-edit\" class=\"icon-edit disabled\" onclick=\"editData('tIdPosting,tTanggal,tTanggalAwal');\">EDIT</button>":""?>
 		  
         </li>
     </ol>
@@ -223,11 +228,15 @@ table input[type=text], table input[type=password],  table select { width:400px;
 		$(function() {
 			$("#tTanggal").datepicker();
 			$("#tTanggal").datepicker("option","dateFormat","dd/mm/yy");
+			$("#tTanggalAwal").datepicker();
+			$("#tTanggalAwal").datepicker("option","dateFormat","dd/mm/yy");
 			$("#tTanggal").datepicker("setDate",v);
+			$("#tTanggalAwal").datepicker("setDate",v);
 		});
 	}
 	
 	setTanggal("<?=$tTanggal?>");
+	setTanggal("<?=$tTanggalAwal?>");
 	
 	
 	if(elm('list')) {

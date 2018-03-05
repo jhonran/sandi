@@ -28,7 +28,19 @@
 	}
 	else {
 		$_SESSION['waktu']=time()+1800;
-		
+		$idAkses = getValue("id_akses","t_user","id_user='".$_SESSION['user']."'");
+		if($idAkses !== '01') {
+			$firstdate = date("Y-m-01");
+			$today = date("Y-m-d");
+			$aPosting = "SELECT tgl_finish FROM `t_posting` WHERE tgl_finish BETWEEN '".$firstdate."' AND '".$today."' ORDER BY tgl_finish DESC LIMIT 1";
+			$bPosting = queryDb($aPosting);
+			$cPosting = mysql_num_rows($bPosting);
+			if($cPosting == 0) {
+				$statPosting = '0';
+			} else {
+				$statPosting = '1';
+			}
+		}
 		$dym=date("Ym");
 		define("NOFAK",$dym.substr(((getValue("substring(no_trans,7,4)","t_glt","no_trans like '".$dym."%' order by no_trans desc limit 0,1")*1)+10001),1,4));
 		define("MTRANS","01");
@@ -494,10 +506,37 @@ function valTanggal(angka) {
 			<span style="margin-right:40px;"><?=$paging['show']?></span><?=(($paging['page'])?"<span>Page :</span>".$paging['page']:"")?>
         </li>
     	<li class="r" style="width:auto;">
-    	  <button id="btn-new" class="icon-new" onclick="elm('tIdTrans').value='<?=NOFAK?>';setTanggal('<?=date("d/m/Y")?>');newData('tId,tNoBukti,tDesc,tBatas');">TAMBAH</button>
-    	  <!--<button id="btn-edit" class="icon-edit disabled" onclick="editData('tId,tIdTrans,tNoBukti');">EDIT</button>-->
-    	  <?=($statHapusTrans==1)?"<button id=\"btn-del\" class=\"icon-del disabled\" onclick=\"delData('del,hal,sort,search,order');\">HAPUS</button>":""?>
-          <button id="btn-search" class="icon-search disabled" onclick="viewJurnal();">VIEW</button>
+		  <?php 
+			if($idAkses !== "01") {
+				
+				if($statPosting == '1') {
+		  ?>
+			<button id="btn-new" class="icon-new" disabled>TAMBAH</button>
+			<button id="btn-edit" class="icon-edit disabled" disabled>EDIT</button>
+			<button id="btn-search" class="icon-search disabled" disabled>VIEW</button>
+		  <?php
+				} else {
+		  ?>
+			<button id="btn-new" class="icon-new" onclick="elm('tIdTrans').value='<?=NOFAK?>';setTanggal('<?=date("d/m/Y")?>');newData('tId,tNoBukti,tDesc,tBatas');">TAMBAH</button>
+			<!--<button id="btn-edit" class="icon-edit disabled" onclick="editData('tId,tIdTrans,tNoBukti');">EDIT</button>-->
+			<?=($statHapusTrans==1)?"<button id=\"btn-del\" class=\"icon-del disabled\" onclick=\"delData('del,hal,sort,search,order');\">HAPUS</button>":""?>
+			<button id="btn-search" class="icon-search disabled" onclick="viewJurnal();">VIEW</button>
+			
+          <?php		  
+				}
+		  ?>
+			
+		  <?php
+			} else {
+		  ?>
+			<button id="btn-new" class="icon-new" onclick="elm('tIdTrans').value='<?=NOFAK?>';setTanggal('<?=date("d/m/Y")?>');newData('tId,tNoBukti,tDesc,tBatas');">TAMBAH</button>
+			<!--<button id="btn-edit" class="icon-edit disabled" onclick="editData('tId,tIdTrans,tNoBukti');">EDIT</button>-->
+			<?=($statHapusTrans==1)?"<button id=\"btn-del\" class=\"icon-del disabled\" onclick=\"delData('del,hal,sort,search,order');\">HAPUS</button>":""?>
+			<button id="btn-search" class="icon-search disabled" onclick="viewJurnal();">VIEW</button>
+		  <?php
+			} 
+		  ?>
+    	  
     	</li>
     </ol>
 </div>
