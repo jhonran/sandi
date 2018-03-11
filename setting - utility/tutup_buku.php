@@ -25,6 +25,11 @@
 												UNION
 												(select tgl_trans AS t from t_glt where 1=1 order by tgl_trans asc limit 1)
 											) x","1=1 limit 1");
+		if($_GT['del']) {
+			queryDb("delete from t_posting where id_posting='".$_GT['del']."'");
+				header("location:?edit=".bs64_e($tId));
+				exit;
+		}
 		if($_PT['tSimpan']) {
 			$tIdPosting=$_PT['tIdPosting'];
 			$tTanggal=$_PT['tTanggal'];
@@ -184,8 +189,8 @@ table input[type=text], table input[type=password],  table select { width:400px;
 			echo "<input type=\"hidden\" id=\"tIdPosting-".$b['id_posting']."\" value=\"".$b['id_posting']."\" />";
 			echo "<input type=\"hidden\" id=\"tTanggalAwal-".$b['id_posting']."\" value=\"".date('d/m/Y', strtotime($b['tgl_start']))."\" />";
 			echo "<input type=\"hidden\" id=\"tTanggal-".$b['id_posting']."\" value=\"".date('d/m/Y', strtotime($b['tgl_finish']))."\" />";
-			echo "<ul id=\"".$b['id_posting']."\" onclick=\"listFocus(this,'edit=1,del=".(!$_EXC[$b['id_posting']])."')\"><li>".$paging['start'].".</li><li>".$b['id_posting']."</li><li>".tglIndo($b['tgl_start'])."</li><li>".tglIndo($b['tgl_finish'])."</li></ul>";
-			if($_GT['edit']==$b['id_posting']) $jsEdit="listFocus(elm('".$b['id_posting']."'),'edit=1,del=".$b['id_posting']."');";
+			echo "<ul id=\"".$b['id_posting']."\" onclick=\"listFocus(this,'edit=1,del=1')\"><li>".$paging['start'].".</li><li>".$b['id_posting']."</li><li>".tglIndo($b['tgl_start'])."</li><li>".tglIndo($b['tgl_finish'])."</li></ul>";
+			if($_GT['edit']==$b['id_posting']) $jsEdit="listFocus(elm('".$b['id_posting']."'),'edit=1,del=1');";
 		
 		}
 	}
@@ -215,9 +220,8 @@ table input[type=text], table input[type=password],  table select { width:400px;
 			<span style="margin-right:40px;"><?=$paging['show']?></span><?=(($paging['page'])?"<span>Page :</span>".$paging['page']:"")?>
         </li>
     	<li class="r" style="width:auto;">
+		  <?=($statTutupBuku==1)?"<button id=\"btn-del\" class=\"icon-edit disabled\" onclick=\"delData('del,hal,sort,search,order');\">BUKA BUKU</button>":""?>
 		  <?=($statTutupBuku==1)?"<button id=\"btn-new\" class=\"icon-new\" onclick=\"newData('tIdPosting');\">TAMBAH</button>":""?>
-		  <?=($statTutupBuku==1)?"<button id=\"btn-edit\" class=\"icon-edit disabled\" onclick=\"editData('tIdPosting,tTanggal,tTanggalAwal');\">EDIT</button>":""?>
-		  
         </li>
     </ol>
 </div>

@@ -93,6 +93,8 @@ ol { padding-left:15px; }
 
 <body>
 <?php
+$tanggal = strtotime(balikTanggal($_GT['periode2']));
+$tglperiode = balikTanggal($_GT['periode2']);
 $where_hibah=($_GT['hibah']!="-")?" and a.hibah='".$_GT['hibah']."'":"";
 
 $_JENIS[1]="ASET TETAP";
@@ -101,7 +103,7 @@ $_JENIS[9]="ASET LAIN-LAIN";
 $_JENIS[0]="ASET TAK BERWUJUD";
 
 $sql="select 
-			if(a.hibah='1','ASET HIBAH','ASET NON HIBAH') as hibah,a.id_aset,a.id_aset_kategori,k.nama as kategori,r.nama as ruangan,a.nama,a.no_inventaris,a.tgl_perolehan,a.jumlah,a.nilai_perolehan,if(a.tgl_perolehan<'".balikTanggal($_GT['periode1'])." 00:00:00',(a.nilai_perolehan-a.residu),0) as nilai1,if(a.tgl_perolehan>='".balikTanggal($_GT['periode1'])." 00:00:00',(a.nilai_perolehan-a.residu),0) as nilai2_d
+			if(a.hibah='1','ASET HIBAH','ASET NON HIBAH') as hibah,k.id_susut_rumus,a.masa_susut,a.id_aset,a.id_aset_kategori,k.nama as kategori,r.nama as ruangan,a.nama,a.no_inventaris,a.tgl_perolehan,a.jumlah,a.nilai_perolehan,if(a.tgl_perolehan<'".balikTanggal($_GT['periode1'])." 00:00:00',(a.nilai_perolehan-a.residu),0) as nilai1,if(a.tgl_perolehan>='".balikTanggal($_GT['periode1'])." 00:00:00',(a.nilai_perolehan-a.residu),0) as nilai2_d
 		from t_aset a 
 			inner join t_ruangan r on r.id_unit1=a.id_unit1 and r.id_unit2=a.id_unit2 and r.id_unit3=a.id_unit3 and r.id_ruangan=a.id_ruangan
 			inner join t_aset_kategori k on k.id_aset_kategori=a.id_aset_kategori
@@ -112,7 +114,122 @@ $sql="select
 
 $a=queryDb($sql);
 while($b=mysql_fetch_array($a)) {
-	$_D[$b['id_aset']]['hibah']=$b['hibah'];
+	if($b['id_susut_rumus'] == "02") {
+		$bulan = $b['masa_susut'] / 12;
+		$nilai = 2 * (100 / $bulan);
+		$date1 = new DateTime($b['tgl_perolehan']);
+		$date2 = new DateTime($tglperiode);
+		$diff = $date1->diff($date2);
+		$blnp = (($diff->format('%y') * 12) + $diff->format('%m')) + 1;
+		$tanggal_akhir = strtotime($b['tgl_perolehan']);
+		$year = date("Y", $tanggal);
+		$year2 = date("Y", $tanggal_akhir);
+		$month = date("m", $tanggal);
+		$month2 = date("m", $tanggal_akhir);
+		$bulantanggal = ($month - $month2) + 1;
+		if($blnp % 12 == 0) {
+			queryDb("insert into t_susut_posting(id_aset,nominal,tanggal) values('".$b['id_aset']."','".$nilai_buku."','".$tglperiode."')");
+		}
+		if($blnp > 12) {
+			$aPosting = "SELECT * FROM t_susut_posting WHERE tanggal LIKE '%".$year."%' LIMIT 1";
+		$bPosting = queryDb($aPosting);
+		if(mysql_num_rows($bPosting) > 0) {
+			$cPosting = mysql_fetch_array($bPosting);
+			$tglPos = strtotime($cPosting['tanggal']);
+			$tglposting = date("m", $tglPos);
+			$akum_penyusutan = $cPosting['nominal'] * $nilai / 100;
+				$biaya_penyusutan = $akum_penyusutan / 12;
+				$biaya_penyusutan_per = $akum_penyusutan - $biaya_penyusutan;
+				$nilai_penyusutan = $biaya_penyusutan;
+				if($bulantanggal == 1) {
+					$nilai_penyusutan = $biaya_penyusutan;
+					$nilai_buku = $cPosting['nominal'] - abs($biaya_penyusutan);
+				} else {
+					$nilai_penyusutan = $biaya_penyusutan * $bulantanggal;
+					$nilai_buku = $cPosting['nominal'] - abs($nilai_penyusutan);
+				}
+				
+
+				if($nilai_penyusutan >= $b['nilai_perolehan']) {
+					$nilai_buku = 0;
+					$_D[$b['id_aset']]['nilai_buku1'] = 0;
+				}
+				$nilai_susut = $cPosting['nominal'];
+			
+		}
+		} else {
+			$akum_penyusutan = $b['nilai_perolehan'] * $nilai / 100;
+			$biaya_penyusutan = $akum_penyusutan / 12;
+			$biaya_penyusutan_per = $akum_penyusutan - $biaya_penyusutan;
+			if($bulantanggal == 1) {
+				$nilai_penyusutan = $biaya_penyusutan;
+				$nilai_buku = $b['nilai_perolehan'] - abs($biaya_penyusutan);
+			} else {
+				$nilai_penyusutan = $biaya_penyusutan * $bulantanggal;
+				$nilai_buku = $b['nilai_perolehan'] - abs($nilai_penyusutan);
+			}
+			if($nilai_penyusutan >= $b['nilai_perolehan']) {
+				$nilai_buku = 0;
+				$_D[$b['id_aset']]['nilai_buku1'] = 0;
+			}
+			$nilai_susut = $b['nilai_perolehan'];
+		}
+
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		$_D[$b['id_aset']]['hibah']=$b['hibah'];
+		$_D[$b['id_aset']]['id_aset_kategori']=$b['id_aset_kategori'];
+		$_D[$b['id_aset']]['kategori']=$b['kategori'];
+		$_D[$b['id_aset']]['ruangan']=$b['ruangan'];
+		$_D[$b['id_aset']]['nama']=$b['nama'];
+		$_D[$b['id_aset']]['no_inventaris']=$b['no_inventaris'];
+		$_D[$b['id_aset']]['tgl_perolehan']=tglIndo($b['tgl_perolehan'],2);
+		$_D[$b['id_aset']]['jumlah']=$b['jumlah'];
+		$_D[$b['id_aset']]['nilai']=$b['nilai_perolehan'];
+		$_D[$b['id_aset']]['nilai1']=$nilai_susut;
+		$_D[$b['id_aset']]['nilai2_d']=0;
+		$_D[$b['id_aset']]['nilai2_k']=0;
+		$_D[$b['id_aset']]['akum_susut']= abs($nilai_penyusutan);
+		$_D[$b['id_aset']]['akum_susut1']=$akum_penyusutan;
+		$_D[$b['id_aset']]['akum_susut2']= abs($nilai_penyusutan);
+		$_D[$b['id_aset']]['akum_susut2_d']=0;
+		$_D[$b['id_aset']]['akum_susut2_k']=0;
+		$_D[$b['id_aset']]['nilai_buku']= $nilai_buku;
+		$_D[$b['id_aset']]['nilai_buku1']=$nilai_buku;
+	} else {
+		$tahun = $b['masa_susut'] / 12;
+		$akum_penyusutan = $b['nilai_perolehan'] / $b['masa_susut'];
+		$biaya_penyusutan = $akum_penyusutan;
+		$biaya_penyusutan_per = $biaya_penyusutan;
+		$nilai_penyusutan = $biaya_penyusutan;
+		$tanggal_akhir = strtotime($b['tgl_perolehan']);
+		$year = date("Y", $tanggal);
+		$year2 = date("Y", $tanggal_akhir);
+		$month = date("m", $tanggal);
+		$month2 = date("m", $tanggal_akhir);
+		$periodetahun = (($year2 - $year));
+		$bulantanggal = (($year2 - $year) * 12) + ($month - $month2) + 1;
+		$date1 = new DateTime($b['tgl_perolehan']);
+		$date2 = new DateTime($tglperiode);
+		$diff = $date1->diff($date2);
+		$blnp = (($diff->format('%y') * 12) + $diff->format('%m')) + 1;
+		$nilai_penyusutan = $biaya_penyusutan * $blnp;
+		$nilai_buku = $b['nilai_perolehan'] - $nilai_penyusutan;
+		if($nilai_penyusutan >= $b['nilai_perolehan']) {
+			$nilai_buku = 0;
+		}
+
+$_D[$b['id_aset']]['hibah']=$b['hibah'];
 	$_D[$b['id_aset']]['id_aset_kategori']=$b['id_aset_kategori'];
 	$_D[$b['id_aset']]['kategori']=$b['kategori'];
 	$_D[$b['id_aset']]['ruangan']=$b['ruangan'];
@@ -121,40 +238,42 @@ while($b=mysql_fetch_array($a)) {
 	$_D[$b['id_aset']]['tgl_perolehan']=tglIndo($b['tgl_perolehan'],2);
 	$_D[$b['id_aset']]['jumlah']=$b['jumlah'];
 	$_D[$b['id_aset']]['nilai']=$b['nilai_perolehan'];
-	$_D[$b['id_aset']]['nilai1']=$b['nilai1'];
-	$_D[$b['id_aset']]['nilai2_d']=$b['nilai2_d'];
+	$_D[$b['id_aset']]['nilai1']=$b['nilai_perolehan'];
+	$_D[$b['id_aset']]['nilai2_d']=0;
 	$_D[$b['id_aset']]['nilai2_k']=0;
-	$_D[$b['id_aset']]['akum_susut']=0;
+	$_D[$b['id_aset']]['akum_susut']= abs($nilai_penyusutan);
 	$_D[$b['id_aset']]['akum_susut1']=0;
-	$_D[$b['id_aset']]['akum_susut2']=0;
+	$_D[$b['id_aset']]['akum_susut2']= abs($nilai_penyusutan);
 	$_D[$b['id_aset']]['akum_susut2_d']=0;
 	$_D[$b['id_aset']]['akum_susut2_k']=0;
-	$_D[$b['id_aset']]['nilai_buku']=($b['nilai1']+$b['nilai2_d']);
-	$_D[$b['id_aset']]['nilai_buku1']=$b['nilai1'];
+	$_D[$b['id_aset']]['nilai_buku']= $nilai_buku;
+	$_D[$b['id_aset']]['nilai_buku1']=$nilai_buku;
+	}
+	
 }
 
 //==========================================
 
-$sql="select x.id_aset,sum(x.nilai1) as nilai1,sum(x.nilai2_d) as nilai2_d,sum(x.nilai2_k) as nilai2_k from (
-					select a.id_aset,
-							if(r.tgl_rev<'".balikTanggal($_GT['periode1'])." 00:00:00',(r.nilai_tambah-r.residu_tambah),0) as nilai1,
-							if(r.tgl_rev>='".balikTanggal($_GT['periode1'])." 00:00:00' and (r.nilai_tambah-r.residu_tambah)>=0,(r.nilai_tambah-r.residu_tambah),0) as nilai2_d,
-							if(r.tgl_rev>='".balikTanggal($_GT['periode1'])." 00:00:00' and (r.nilai_tambah-r.residu_tambah)<0,((r.nilai_tambah-r.residu_tambah)*-1),0) as nilai2_k 
-						from t_aset a
-							inner join t_aset_rev r on r.id_aset=a.id_aset and r.tgl_rev<='".balikTanggal($_GT['periode2'])." 23:59:59'
-						where a.tgl_perolehan<='".balikTanggal($_GT['periode2'])." 23:59:59' and concat(a.id_unit1,'.',a.id_unit2,'.',a.id_unit3) in ('".str_replace("#","','",$tUnit)."') and a.jenis='".$_GT['jenis']."' ".$where_hibah." and a.status='1'
-				) x
-				group by x.id_aset";
+$sql="SELECT * FROM t_aset as a inner join t_aset_rev r on r.id_aset=a.id_aset and r.tgl_rev<='".balikTanggal($_GT['periode2'])." 23:59:59' where a.tgl_perolehan<='".balikTanggal($_GT['periode2'])." 23:59:59' and concat(a.id_unit1,'.',a.id_unit2,'.',a.id_unit3) in ('".str_replace("#","','",$tUnit)."') and a.jenis='".$_GT['jenis']."' ".$where_hibah." and a.status='1'";
 				
 				//echo $sql;
 
 $a=queryDb($sql);
-while($b=mysql_fetch_array($a)) {	
-	$_D[$b['id_aset']]['nilai1']+=$b['nilai1'];
-	$_D[$b['id_aset']]['nilai2_d']+=$b['nilai2_d'];
-	$_D[$b['id_aset']]['nilai2_k']+=$b['nilai2_k'];
-	$_D[$b['id_aset']]['nilai_buku']+=($b['nilai1']+($b['nilai2_d']-$b['nilai2_k']));
-	$_D[$b['id_aset']]['nilai_buku1']+=$b['nilai1'];
+while($b=mysql_fetch_array($a)) {
+	if($b['status_aset'] == 0) {
+		$_D[$b['id_aset']]['nilai1']+=0;
+		$_D[$b['id_aset']]['nilai2_d']+=$b['nilai_tambah'];
+		$_D[$b['id_aset']]['nilai2_k']+=0;
+		$_D[$b['id_aset']]['nilai_buku']+=0;
+		$_D[$b['id_aset']]['nilai_buku1']+=0;
+	} else {
+		$_D[$b['id_aset']]['nilai1']+=0;
+	$_D[$b['id_aset']]['nilai2_d']+=0;
+	$_D[$b['id_aset']]['nilai2_k']+=abs($b['nilai_tambah']);
+	$_D[$b['id_aset']]['nilai_buku']+=0;
+	$_D[$b['id_aset']]['nilai_buku1']+=0;
+	}
+	
 }
 
 //==========================================
@@ -211,12 +330,12 @@ while($b=mysql_fetch_array($a)) {
             	  <td rowspan="3" class="c"><strong>JUMLAH</strong></td>
             	  <td rowspan="3" class="c"><strong>HARGA<br />PEROLEHAN</strong></td>
             	  <td rowspan="3" class="c"><strong>NILAI<br />YANG<br />DISUSUTKAN</strong> </td>
-            	  <td rowspan="3" class="c"><strong>AKUMULASI<br />PENYUSUTAN<br />s/d <?=tglIndo(dateInterval(balikTanggal($_GT['periode1']),0,0,-1,0,0,0,"Y-m-d"),2);?></strong> </td>
+            	  <td rowspan="3" class="c"><strong>AKUMULASI<br />PENYUSUTAN<br />s/d <?=tglIndo(dateInterval(balikTanggal($_GT['periode1']),1,0,-1,0,0,0,"Y-m-d"),2);?></strong> </td>
             	  <td colspan="4" class="c"><strong><?=tglIndo(balikTanggal($_GT['periode1']))?> s.d <?=tglIndo(balikTanggal($_GT['periode2']),2)?></strong></td>
             	  <td rowspan="3" class="c"><strong>BIAYA<br />PENYUSUTAN</strong></td>
             	  <td rowspan="3" class="c"><strong>AKUMULASI<br />PENYUSUTAN<br />s.d <?=tglIndo(balikTanggal($_GT['periode2']),2)?></strong></td>
             	  <td rowspan="3" class="c"><strong>NILAI BUKU<br />s/d <?=tglIndo(balikTanggal($_GT['periode2']),2);?></strong></td>
-            	  <td rowspan="3" class="c"><strong>NILAI BUKU<br />s/d <?=tglIndo(dateInterval(balikTanggal($_GT['periode1']),0,0,-1,0,0,0,"Y-m-d"),2);?></strong></td>
+            	  <td rowspan="3" class="c"><strong>NILAI BUKU<br />s/d <?=tglIndo(dateInterval(balikTanggal($_GT['periode1']),1,0,-1,0,0,0,"Y-m-d"),2);?></strong></td>
             	</tr>
             	<tr>
             	  <td colspan="2" class="c"><strong>TAMBAH</strong><strong></strong></td>

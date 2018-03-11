@@ -225,33 +225,9 @@ table input[type=text], table input[type=password],  table select { width:400px;
 			<span style="margin-right:40px;"><?=$paging['show']?></span><?=(($paging['page'])?"<span>Page :</span>".$paging['page']:"")?>
         </li>
     	<li class="r" style="width:auto;">
-		  <?php 
-			if($idAkses !== "01") {
-				if($statPosting == '1') {
-		  ?>
-			<button id="btn-new" class="icon-new" disabled>TAMBAH</button>
-			<button id="btn-edit" class="icon-edit disabled" disabled>EDIT</button>
-			<button id="btn-del" class="icon-del disabled" disabled>HAPUS</button>
-		  <?php
-				} else {
-		  ?>
 		  <button id="btn-new" class="icon-new" onclick="newData('tId,tIdPegawai,tNama,tJabatan,tStatPeg');">TAMBAH</button>
-			<button id="btn-edit" class="icon-edit disabled" onclick="editData('tId,tIdPegawai,tNama,tJabatan,tStatPeg');">EDIT</button>
-			<button id="btn-del" class="icon-del disabled" onclick="delData('del,hal,sort,search,order');">HAPUS</button>
-			
-          <?php		  
-				}
-		  ?>
-			
-		  <?php
-			} else {
-		  ?>
-			<button id="btn-new" class="icon-new" onclick="newData('tId,tIdPegawai,tNama,tJabatan,tStatPeg');">TAMBAH</button>
-			<button id="btn-edit" class="icon-edit disabled" onclick="editData('tId,tIdPegawai,tNama,tJabatan,tStatPeg');">EDIT</button>
-			<button id="btn-del" class="icon-del disabled" onclick="delData('del,hal,sort,search,order');">HAPUS</button>
-		  <?php
-			} 
-		  ?>
+	      <button id="btn-edit" class="icon-edit disabled" onclick="editData('tId,tIdPegawai,tNama,tJabatan,tStatPeg');">EDIT</button>
+		  <button id="btn-del" class="icon-del disabled" onclick="delData('del,hal,sort,search,order');">HAPUS</button>
 		  
         </li>
     </ol>

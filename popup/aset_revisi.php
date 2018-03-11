@@ -231,7 +231,7 @@ table input[type=text], table input[type=password],  table select { width:400px;
 						<input type="hidden" name="nilainilaiasetminus" id="nilainilaiasetminus" />
 					</div>
                     <div id="nilaiasetminus">
-						<input type="text" name="tNominal2" id="tNominal2" value="<?=htmlentities($tNominal)?>" maxlength="20" onkeyup="hideFade('errtNominal');sumangka1(this,'tNominal');" style="text-align:right;width:110px;" /> = 
+						<input type="text" name="tNominal2" id="tNominal2" value="" maxlength="20" onkeyup="hideFade('errtNominal');sumangka1(this,'tNominal');" style="text-align:right;width:110px;" /> = 
 						<input type="text" id="tNominalAkhir2" value="<?=htmlentities(showRupiah2(array_sum($_DATA['nilai'])+clearRupiah($tNominal)))?>" readonly="readonly" class="readonly" style="text-align:right;width:130px;" />
 						<input type="hidden" name="nilainilaiasetminus2" id="nilaiasetminus2" />
 					</div>
@@ -410,13 +410,12 @@ table input[type=text], table input[type=password],  table select { width:400px;
 		valnominal(e);
 		elm(t+'Akhir2').value=shownominal(clearRupiah(elm(t+'Awal').value)-clearRupiah(e.value));
 		var nominalAkhir = elm('tNominal2').value;
-		var nominalAkhir = nominalAkhir.replace(".","");
-		var nilaiNominalAkhir = parseInt(nominalAkhir);
+		var nilaiNominalAkhir = nominalAkhir.toString().replace(/\./g,"");
 		var nominalResidus = elm('tResidu2').value;
-		var nominalResidus = nominalResidus.replace(".","");
+		var nominalResidus = nominalAkhir.toString().replace(/\./g,"");
 		var nilaiNominalResidus = parseInt(nominalResidus);
 		elm('masasusutminus').value = elm('tMasaSusutAkhir2').value;
-		elm('nilaiasetminus2').value = -Math.abs(nilaiNominalAkhir);
+		elm('nilaiasetminus2').value = -Math.abs(parseInt(nilaiNominalAkhir));
 		elm('nilairesiduminus2').value = -Math.abs(nilaiNominalResidus);
 		elm('tNominalTotal').value=shownominal(clearRupiah(elm('tNominalAkhir2').value)-clearRupiah(elm('tResiduAkhir2').value));
 	}
